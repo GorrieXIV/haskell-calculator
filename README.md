@@ -1,7 +1,7 @@
 # INSTRUCTIONS
-> ghc Main.hs
-> ./Main
-> "(add (1 1))" 
+- ghc Main.hs
+- ./Main
+- "(add (1 1))" 
 
 # USAGE
 - All operations must be encased in brackets
