@@ -3,24 +3,25 @@ import Expr
 
 parseToExpr :: [String] -> Expr
 parseToExpr [] = Num 0
-parseToExpr ("(":"multiply":xs) = Multiply (findArg1 xs [] 0) (findArg2 xs 0)
-parseToExpr ("(":"add":xs) = Add (findArg1 xs [] 0) (findArg2 xs 0)
-parseToExpr (p:[]) = Num (read p)
+parseToExpr ("(":"multiply":xs) = Multiply (parseToExpr (findArg1 xs [] 0)) (parseToExpr (findArg2 xs [] 0))
+parseToExpr ("(":"add":xs) = Add (parseToExpr (findArg1 xs [] 0)) (parseToExpr (findArg2 xs [] 0))
+parseToExpr (p:[]) = Num (read p :: Int)
 
-findArg1 :: [String] -> [String] -> Int -> Expr
-findArg1 [] ys n = parseToExpr ys
+findArg1 :: [String] -> [String] -> Int -> [String]
+findArg1 [] ys n = ys
 findArg1 ("(":xs) ys n = (findArg1 xs (ys ++ "(":[]) (n+1))
-findArg1 (")":xs) ys 1 = parseToExpr (ys ++ ")":[])
+findArg1 (")":xs) ys 1 = (ys ++ ")":[])
 findArg1 (")":xs) ys n = (findArg1 xs (ys ++ ")":[]) (n-1))
-findArg1 (x:xs) [] 0 = parseToExpr (x:[])
+findArg1 (x:xs) [] 0 = (x:[])
 findArg1 (x:xs) ys n = (findArg1 xs (ys ++ x:[]) n)
 
-findArg2 :: [String] -> Int -> Expr
-findArg2 ("(":xs) n = findArg2 xs (n+1)
-findArg2 (x:xs) 0 = parseToExpr (init xs)
-findArg2 (")":xs) (-1) = parseToExpr (init xs)
-findArg2 (")":xs) n = findArg2 xs (n-1)
-findArg2 _ _ = error "incorrect format"
+findArg2 :: [String] -> [String] -> Int -> [String]
+findArg2 (x:")":[]) [] n = x:[]
+findArg2 (")":xs) ys  (-1) = (init xs)
+findArg2 ("(":xs) ys n = findArg2 xs ys (n+1)
+findArg2 (")":xs) ys n = findArg2 xs ys (n-1)
+findArg2 (x:xs) [] 0 = (init xs)
+findArg2 (x:xs) [] n = findArg2 xs n
 
 separateBraces :: [String] -> [String]
 separateBraces [] = []
@@ -44,4 +45,4 @@ sepTailBraces x = if (head (reverse x)) == ')' then (sepTailBraces (init x)) ++ 
 
 main :: IO ()
 main = do x <- readLn
-          print $ (evalExpr (parseToExpr (separateBraces (words x))))
+          print $ (showExpr (parseToExpr (separateBraces (words x))))
